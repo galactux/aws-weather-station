@@ -1,4 +1,4 @@
-# README #
+# aws-weather-station #
 
 Simple weather web service running under an Amazon Linux image on AWS EC2.
 * Backend: Apache and Tomcat, Java Spring Boot, MongoDB(?)
@@ -9,18 +9,23 @@ Simple weather web service running under an Amazon Linux image on AWS EC2.
 
 ### Setting up a development environment ###
 * My dev env: Linux Debian 9 virtual machine
-* Required/useful tools:
+* Required tools:
   * OpenJDK 8 - Open Java Development Kit
   * Maven - Java software project management and comprehension tool
+  * Node.js 8 and npm (https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions)
+* Useful tools:  
   * Curl - Command line tool for transferring data with URL syntax
   * Browser LiveReload extension: http://livereload.com/extensions/
-* To build Spring Boot app, output: `target/weather-station.war`
+* Install:
   ```
-  mvn clean package
+  $ git clone git@github.com:galactux/aws-weather-station.git
+  $ cd aws-weather-station/frontend/
+  $ npm install
+  $ cd ..
   ```
-* Run, output: http://localhost:8080/, http://localhost:8080/rest/
+* Build:
   ```
-  mvn spring-boot:run
+  $ ./build.sh
   ```
 
 ### Setting up an AWS EC2 instance ###
@@ -34,7 +39,7 @@ Simple weather web service running under an Amazon Linux image on AWS EC2.
   ```
 * `$ ssh -i <identity_file> ec2-user@<ec2_public_dns>`
   ```
-  # sudo su
+  $ sudo su
   # yum update
   # yum install httpd
   # yum list tomcat*
@@ -58,5 +63,5 @@ Simple weather web service running under an Amazon Linux image on AWS EC2.
   # chkconfig httpd on
   # exit
   ```
-* Upload and deploy WAR file (`target/weather-station.war`)
+* Upload and deploy WAR file (`backend/target/weather-station.war`)
   * http://<ec2_ipv4_public_ip>:8080/manager/html

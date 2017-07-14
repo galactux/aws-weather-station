@@ -1,5 +1,6 @@
 # Back-end
 /backend/target/
+/backend/src/main/resources/
 
 # Front-end
 /frontend/node_modules/

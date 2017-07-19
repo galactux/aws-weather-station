@@ -1,7 +1,7 @@
 # aws-weather-station #
 
 Simple weather web service running under an Amazon Linux image on AWS EC2.
-* Backend: Apache and Tomcat, Java Spring Boot, MongoDB(?)
+* Backend: Apache and Tomcat, Java Spring Boot, MongoDB
 * Frontend: JavaScript React + Redux, Bootstrap, D3.js(?), JWT Token(?)
 * Weather data come from:
   * Local Raspberry Pi, coding with Python (https://www.raspberryweather.com/)
@@ -13,8 +13,10 @@ Simple weather web service running under an Amazon Linux image on AWS EC2.
   * OpenJDK 8 - Open Java Development Kit
   * Maven - Java software project management and comprehension tool
   * Node.js 8 and npm (https://nodejs.org/en/download/package-manager/#debian-and-ubuntu-based-linux-distributions)
-* Useful tools:  
+  * MongoDB
+* Useful tools:
   * Curl - Command line tool for transferring data with URL syntax
+  * Robo 3T, formerly Robomongo (https://robomongo.org/)
   * Browser LiveReload extension: http://livereload.com/extensions/
 * Install:
   ```
@@ -22,6 +24,7 @@ Simple weather web service running under an Amazon Linux image on AWS EC2.
   $ cd aws-weather-station/frontend/
   $ npm install
   $ cd ..
+  $ sudo service mongod start
   ```
 * Build:
   ```
@@ -37,6 +40,7 @@ Simple weather web service running under an Amazon Linux image on AWS EC2.
   Custom TCP Rule   TCP        8080
   SSH               TCP        22
   ```
+* https://docs.mongodb.com/manual/tutorial/install-mongodb-on-amazon/
 * `$ ssh -i <identity_file> ec2-user@<ec2_public_dns>`
   ```
   $ sudo su
@@ -61,6 +65,16 @@ Simple weather web service running under an Amazon Linux image on AWS EC2.
   </VirtualHost>
   # service httpd start
   # chkconfig httpd on
+  # nano /etc/yum.repos.d/mongodb-org-3.4.repo
+  [mongodb-org-3.4]
+  name=MongoDB Repository
+  baseurl=https://repo.mongodb.org/yum/amazon/2013.03/mongodb-org/3.4/x86_64/
+  gpgcheck=1
+  enabled=1
+  gpgkey=https://www.mongodb.org/static/pgp/server-3.4.asc
+  # yum install mongodb-org
+  # service mongod start
+  # chkconfig mongod on
   # exit
   ```
 * Upload and deploy WAR file (`backend/target/weather-station.war`)

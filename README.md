@@ -1,8 +1,8 @@
 # aws-weather-station #
 
 Simple weather web service running under an Amazon Linux image on AWS EC2.
-* Backend: Apache and Tomcat, Java Spring Boot, MongoDB
-* Frontend: JavaScript React + Redux, Bootstrap, D3.js(?), JWT Token(?)
+* Backend: Apache and Tomcat, Java Spring Boot, MongoDB, JSON Web Token (JWT)
+* Frontend: JavaScript React + Redux, Bootstrap, D3.js(?)
 * Weather data come from:
   * Local Raspberry Pi, coding with Python (https://www.raspberryweather.com/)
   * Finnish Meteorological Institute, open data: https://ilmatieteenlaitos.fi/avoin-data

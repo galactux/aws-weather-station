@@ -1,53 +1,69 @@
 package com.galactux.weatherstation;
 
-import com.mongodb.BasicDBObjectBuilder;
-import com.mongodb.DB;
-import com.mongodb.DBCollection;
-import com.mongodb.Mongo;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureException;
+import java.io.IOException;
+import java.util.UUID;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.boot.web.support.SpringBootServletInitializer;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
-
-// http://www.mkyong.com/mongodb/
+import org.springframework.context.annotation.Bean;
+import org.springframework.web.filter.GenericFilterBean;
 
 
-@RequestMapping("/rest")
-@RestController
 @SpringBootApplication
 public class WeatherStationApplication extends SpringBootServletInitializer {
 
-    private static final Log log = LogFactory.getLog(WeatherStationApplication.class);
-    private static final DB weatherDB = (
-        new Mongo("localhost", 27017)).getDB("weather");
-    private static final DBCollection weatherEvent = weatherDB.getCollection(
-        "weatherEvent");
+    protected static final Log log = LogFactory.getLog(
+        WeatherStationApplication.class);
+
+    protected static final String jwtSigningKey = UUID.randomUUID().toString();
+
+    private class JwtFilter extends GenericFilterBean {
+        @Override
+        public void doFilter(
+                final ServletRequest request,
+                final ServletResponse response,
+                final FilterChain chain) throws IOException, ServletException {
+
+            final String authHeader = (
+                (HttpServletRequest) request).getHeader("Authorization");
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                throw new ServletException("Missing or invalid Authorization header.");
+            }
+            try {
+                request.setAttribute("claims", Jwts
+                    .parser()
+                    .setSigningKey(jwtSigningKey)
+                    .parseClaimsJws(authHeader.substring(7)) // The part after "Bearer "
+                    .getBody());
+            }
+            catch (final SignatureException e) {
+                throw new ServletException("Invalid token.");
+            }
+            chain.doFilter(request, response);
+        }
+    }
+
+    @Bean
+    public FilterRegistrationBean jwtFilter() {
+        final FilterRegistrationBean registrationBean = new FilterRegistrationBean();
+        registrationBean.setFilter(new JwtFilter());
+        registrationBean.addUrlPatterns("/api/*");
+        return registrationBean;
+    }
 
     public static void main(String[] args) throws Exception {
         SpringApplication.run(WeatherStationApplication.class, args);
-    }
-
-    @RequestMapping(value="/weather", method = RequestMethod.POST)
-    public Map<String, Object> createWeatherEvent(@RequestBody Map<String, Object> body) {
-        log.info("createWeatherEvent: " + body);
-
-        BasicDBObjectBuilder dbObj = BasicDBObjectBuilder.start()
-            .add("location", body.get("location").toString())
-            .add("temperature", Integer.parseInt(body.get("temperature").toString()))
-            .add("time", body.get("time").toString());
-        weatherEvent.insert(dbObj.get());
-
-        Map<String, Object> response = new LinkedHashMap<String, Object>();
-        response.put("message", "Created successfully");
-        response.put("weatherEvent", dbObj.get());
-        return response;
+        log.info("JWT signing key: " + jwtSigningKey);
     }
 
 }
